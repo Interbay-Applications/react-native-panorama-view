@@ -112,7 +112,7 @@
         if (_bridge == nil) {
             NSLog(@"[PanoramaView] Bridge not available.");
         }
-        if (!imageUrl.length) {
+        if (!imageData.length) {
             NSLog(@"[PanoramaView] Image argument not sufficient.");
         }
         NSLog(@"[PanoramaView] Image argument not sufficient or bridge image loader not available.");
