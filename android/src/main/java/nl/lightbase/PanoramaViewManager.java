@@ -2,6 +2,7 @@ package nl.lightbase;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.util.Base64;
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -46,6 +47,7 @@ public class PanoramaViewManager extends SimpleViewManager<VrPanoramaView> {
     private Integer imageWidth;
     private Integer imageHeight;
     private URL imageUrl;
+    private String imageData;
 
     public PanoramaViewManager(ReactApplicationContext context) {
         super();
@@ -91,6 +93,10 @@ public class PanoramaViewManager extends SimpleViewManager<VrPanoramaView> {
             } catch (Exception e) {
                 emitEvent("onImageLoadingFailed", null);
             }
+        }else if(imageData != null) {
+            byte[] imageBytes = Base64.decode(imageData, Base64.DEFAULT);
+            Bitmap decodedImage = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+            vrPanoramaView.loadImageFromBitmap(decodedImage, _options);
         } else {
             emitEvent("onImageLoadingFailed", null);
         }
@@ -117,6 +123,21 @@ public class PanoramaViewManager extends SimpleViewManager<VrPanoramaView> {
 
         try {
             imageUrl = new URL(value);
+        } catch (MalformedURLException e) {
+            emitEvent("onImageLoadingFailed", null);
+        }
+    }
+
+    @ReactProp(name = "imageData")
+    public void setImageSource(VrPanoramaView view, String value) {
+        Log.i(REACT_CLASS, "Image source: " + value);
+
+        if (imageData != null && imageData.toString().equals(value)) {
+            return;
+        }
+
+        try {
+            imageData = value;
         } catch (MalformedURLException e) {
             emitEvent("onImageLoadingFailed", null);
         }

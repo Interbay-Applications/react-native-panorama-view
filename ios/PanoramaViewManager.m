@@ -24,5 +24,6 @@ RCT_EXPORT_VIEW_PROPERTY(enableTouchTracking, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(onImageLoadingFailed, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(onImageLoaded, RCTDirectEventBlock);
 RCT_EXPORT_VIEW_PROPERTY(imageUrl, NSString);
+RCT_EXPORT_VIEW_PROPERTY(imageData, NSString);
 
 @end

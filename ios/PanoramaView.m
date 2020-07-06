@@ -89,6 +89,37 @@
     }
 }
 
+-(void)setImageData:(NSString *)imageData
+{
+    NSLog(@"%@", [NSString stringWithFormat:@"[PanoramaView] Image data: %@", imageData]);
+
+    __weak PanoramaView *weakSelf = self;
+
+    if (imageData.length) {
+        NSLog(@"[PanoramaView] Getting ready to load.");
+
+        NSData *data = [[NSData alloc] initWithBase64EncodedString:imageData options:nil];
+        UIImage *image = [UIImage imageWithData:data];
+        dispatch_async([weakSelf methodQueue], ^{
+            if(image) {
+                self->_panoView.image = image;
+                [self imageLoaded];
+            }else {
+                [self imageLoadingFailed];
+            }
+        });
+    } else {
+        if (_bridge == nil) {
+            NSLog(@"[PanoramaView] Bridge not available.");
+        }
+        if (!imageUrl.length) {
+            NSLog(@"[PanoramaView] Image argument not sufficient.");
+        }
+        NSLog(@"[PanoramaView] Image argument not sufficient or bridge image loader not available.");
+        [self imageLoadingFailed];
+    }
+}
+
 -(void)setEnableTouchTracking:(BOOL)enableTouchTracking
 {
     if (enableTouchTracking) {

@@ -3,6 +3,7 @@ import { requireNativeComponent, ViewStyle, Platform } from "react-native";
 
 interface Props {
   imageUrl: string;
+  imageData: string;
   dimensions?: { width: number; height: number }; // Android-only
   inputType?: "mono" | "stereo"; // Android-only
   enableTouchTracking?: boolean;
