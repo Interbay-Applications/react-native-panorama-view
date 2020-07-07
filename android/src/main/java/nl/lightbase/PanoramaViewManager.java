@@ -136,11 +136,7 @@ public class PanoramaViewManager extends SimpleViewManager<VrPanoramaView> {
             return;
         }
 
-        try {
-            imageData = value;
-        } catch (MalformedURLException e) {
-            emitEvent("onImageLoadingFailed", null);
-        }
+        imageData = value;
     }
 
     @ReactProp(name = "dimensions")
