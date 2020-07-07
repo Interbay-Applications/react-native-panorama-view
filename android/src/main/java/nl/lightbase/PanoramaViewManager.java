@@ -129,7 +129,7 @@ public class PanoramaViewManager extends SimpleViewManager<VrPanoramaView> {
     }
 
     @ReactProp(name = "imageData")
-    public void setImageSource(VrPanoramaView view, String value) {
+    public void setImageSourceData(VrPanoramaView view, String value) {
         Log.i(REACT_CLASS, "Image source: " + value);
 
         if (imageData != null && imageData.toString().equals(value)) {
