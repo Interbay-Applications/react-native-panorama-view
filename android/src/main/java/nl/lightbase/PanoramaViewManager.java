@@ -191,7 +191,9 @@ public class PanoramaViewManager extends SimpleViewManager<VrPanoramaView> {
                     return false;
                 } finally {
                     try {
-                        istr.close();
+                        if(istr != null){
+                            istr.close();
+                        }
                     } catch (IOException e) {
                         Log.e(REACT_CLASS, "Could not close input stream: " + e);
 
