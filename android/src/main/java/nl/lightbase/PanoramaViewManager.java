@@ -64,6 +64,15 @@ public class PanoramaViewManager extends SimpleViewManager<VrPanoramaView> {
     }
 
     @Override
+    public void onCatalystInstanceDestroy() {
+        super.onCatalystInstanceDestroy();
+        if(vrPanoramaView) {
+            Log.i(REACT_CLASS, "Shutting gvrsdk down");
+            vrPanoramaView.shutdown();
+        }
+    }
+
+    @Override
     public VrPanoramaView createViewInstance(ThemedReactContext context) {
         vrPanoramaView = new VrPanoramaView(context.getCurrentActivity());
         vrPanoramaView.setEventListener(new ActivityEventListener());
