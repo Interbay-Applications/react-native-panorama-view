@@ -7,7 +7,7 @@ import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.Pair;
-import android.webkit.URLUtil;
+import android.net.Uri;
 
 import com.facebook.infer.annotation.Assertions;
 import com.facebook.react.bridge.Arguments;
@@ -29,6 +29,8 @@ import org.apache.commons.io.IOUtils;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -46,7 +48,7 @@ public class PanoramaViewManager extends SimpleViewManager<VrPanoramaView> {
     private ImageLoaderTask imageLoaderTask;
     private Integer imageWidth;
     private Integer imageHeight;
-    private URL imageUrl;
+    private String imageUrl;
     private String imageData;
 
     public PanoramaViewManager(ReactApplicationContext context) {
@@ -66,7 +68,7 @@ public class PanoramaViewManager extends SimpleViewManager<VrPanoramaView> {
     @Override
     public void onCatalystInstanceDestroy() {
         super.onCatalystInstanceDestroy();
-        if(vrPanoramaView) {
+        if(vrPanoramaView != null) {
             Log.i(REACT_CLASS, "Shutting gvrsdk down");
             vrPanoramaView.shutdown();
         }
@@ -95,7 +97,7 @@ public class PanoramaViewManager extends SimpleViewManager<VrPanoramaView> {
         }
 
 
-        if (imageUrl != null && URLUtil.isValidUrl(imageUrl.toString())) {
+        if (imageUrl != null) {
             try {
                 imageLoaderTask = new ImageLoaderTask();
                 imageLoaderTask.execute(Pair.create(imageUrl, _options));
@@ -126,15 +128,11 @@ public class PanoramaViewManager extends SimpleViewManager<VrPanoramaView> {
     public void setImageSource(VrPanoramaView view, String value) {
         Log.i(REACT_CLASS, "Image source: " + value);
 
-        if (imageUrl != null && imageUrl.toString().equals(value)) {
+        if (imageUrl != null && imageUrl.equals(value)) {
             return;
         }
 
-        try {
-            imageUrl = new URL(value);
-        } catch (MalformedURLException e) {
-            emitEvent("onImageLoadingFailed", null);
-        }
+        imageUrl = value;
     }
 
     @ReactProp(name = "imageData")
@@ -175,27 +173,44 @@ public class PanoramaViewManager extends SimpleViewManager<VrPanoramaView> {
         view.setTouchTrackingEnabled(enableTouchTracking);
     }
 
-    class ImageLoaderTask extends AsyncTask<Pair<URL, VrPanoramaView.Options>, Void, Boolean> {
-        protected Boolean doInBackground(Pair<URL, VrPanoramaView.Options>... fileInformation) {
-            final URL imageUrl = fileInformation[0].first;
+    class ImageLoaderTask extends AsyncTask<Pair<String, VrPanoramaView.Options>, Void, Boolean> {
+        protected Boolean doInBackground(Pair<String, VrPanoramaView.Options>... fileInformation) {
+
+            if(isCancelled()){
+                return false;
+            }
+
+            String value = fileInformation[0].first;
             VrPanoramaView.Options _options = fileInformation[0].second;
 
             InputStream istr = null;
             Bitmap image;
 
-            if (!imageCache.containsKey(imageUrl)) {
+            if (!imageCache.containsKey(value)) {
                 try {
-                    HttpURLConnection connection = (HttpURLConnection) fileInformation[0].first.openConnection();
-                    connection.connect();
+                    Uri imageUri = Uri.parse(value);
+                    String scheme = imageUri.getScheme();
 
-                    istr = connection.getInputStream();
+                    if(scheme == null || scheme.equalsIgnoreCase("file")){
+                        istr = new FileInputStream(new File(imageUri.getPath()));
+                    }
+                    else{
+                        URL url = new URL(value);
+    
+                        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+                        connection.connect();
+    
+                        istr = connection.getInputStream();
+                    }
 
                     Assertions.assertCondition(istr != null);
 
-                    imageCache.put(imageUrl, decodeSampledBitmap(istr));
-                } catch (IOException e) {
+                    imageCache.put(value, decodeSampledBitmap(istr));
+                } catch (Exception e) {
                     Log.e(REACT_CLASS, "Could not load file: " + e);
-
+                    if(isCancelled()){
+                        return false;
+                    }
                     emitEvent("onImageLoadingFailed", null);
                     return false;
                 } finally {
