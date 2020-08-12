@@ -44,7 +44,7 @@ public class PanoramaViewManager extends SimpleViewManager<VrPanoramaView> {
     private VrPanoramaView vrPanoramaView;
 
     private VrPanoramaView.Options _options = new VrPanoramaView.Options();
-    private Map<URL, Bitmap> imageCache = new HashMap<>();
+    private Map<String, Bitmap> imageCache = new HashMap<>();
     private ImageLoaderTask imageLoaderTask;
     private Integer imageWidth;
     private Integer imageHeight;
